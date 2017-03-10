@@ -8,20 +8,83 @@ Pyechonest is an open source Python library for the Echo Nest API.  With Pyechon
   * **arbitrary number of corners** - More corners means more complicated domains.  Great for domains with bays, estuaries, and other complicated features.
   * **a single orthogonal grid as a result** - Whites whiter!  Brights brighter!
 
-## Install
-We are working on packaging using Bento, but for now, you need to:
+## Setting up a fresh linux box for grid generation
+Basics linux stuff
 
-* cd external/nn; ./configure ; make install
-* cd external/csa; ./configure ; make install
-* cd external/gridutils; ./configure ; make install
-* cd external/gridgen; ./configure ; make shlib
-* cd pygridgen; python setup.py install
+$ sudo apt-get update && sudo apt-get upgrade
+$ sudo apt-get autoremove libreoffice-common
+$ sudo apt-get install git vim build-essential gfortran
 
-## Getting Started
- * Install pygridgen
- * **start in upper left hand corner** - to use the Echo Nest API you need an Echo Nest API key.  You can get one for free at [developer.echonest.com](http://developer.echonest.com).
- * **define points as 1 or 0** - you can do this one of two ways:
-  * more information needs to be put in here....
+Getting miniconda and creating an environment
 
-## Examples
-* Rob's sweet example number one
+$ wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+$ chmod +x miniconda.sh
+$ ./miniconda.sh -b
+$ export PATH=/home/grid/miniconda/bin:$PATH
+$ conda update conda
+$ conda create --name=gridgen python=2.7 pip nose matplotlib numpy --yes
+$ source activate gridgen
+
+Dealing with projected data:
+
+If you're on 64-bit linux:
+
+$ conda install -c https://conda.binstar.org/rsignell pyproj --yes
+
+Or if you're on 32-bit linux:
+
+$ conda install basemap --yes
+
+Cloning repos from github
+
+$ mkdir sources && cd sources
+$ git clone https://github.com/geosyntec/pygridgen.git
+
+Building C/C++ dependencies
+
+$ cd pygridgen/external
+nearest neighbors
+
+$ cd nn
+$ ./configure && sudo make install
+$ cd ..
+
+CSA
+
+$ cd csa
+$ ./configure && sudo make install
+$ cd ..
+
+gridutils
+
+$ cd gridutils
+$ ./configure
+
+Edit the makefile and change this (line ~31):
+
+CFLAGS = -g -O2 -Wall -pedantic
+
+To this:
+
+CFLAGS = -g -O2 -Wall -pedantic -fPIC
+
+After doing this, do not run ./configure again
+
+$ sudo make install
+$ cd ..
+
+gridgen-C
+
+$ cd gridgen
+$ ./configure
+$ sudo make
+$ sudo make lib
+$ sudo make shlib
+$ sudo make install
+$ cd ..
+
+Install pygridgen
+
+$ cd ~/sources/pygridgen
+$ source activate gridgen
+$ python setup.py install
